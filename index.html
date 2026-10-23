@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#e6e8e8">
+<meta name="description" content="Find something to watch by mood across Netflix, Prime Video (with BritBox) and Hulu.">
+<title>Mood Reel</title>
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=Fragment+Mono&display=swap">
+<style>
+/* Darkroom. Layout: one left-aligned column on a single axis. The sentence grows as you drill in;
+   moods sit in contact-sheet rows; picks swipe and develop from safelight red into color. */
+:root{
+  /* color — silver gelatin: a black-and-white proof sheet under room light, china-marker red */
+  --ink:#e6e8e8; --ink-2:#f4f5f5; --ink-3:#dcdfdf; --line:#bfc4c4; --line-soft:#d2d6d6;
+  --ctl:#737a7b; /* control outlines: 3.2:1+ on every surface (WCAG 1.4.11) */
+  --text:#1f2324; --text-hi:#0f1213; --muted:#525a5c;
+  --safe:#b8261c; --safe-hi:#a8231a; --on-safe:#fff6f3;
+  /* film stock for tickets and filter pills: charcoal with sprocket holes punched through to the paper */
+  --card:#ffffff; --card-r:12px; /* floating cards */
+  --card-shadow:0 1px 2px rgba(20,24,25,.06),0 8px 22px rgba(20,24,25,.10);
+  --card-shadow-hi:0 2px 4px rgba(20,24,25,.08),0 12px 30px rgba(20,24,25,.14);
+  --stock:#fbfbf9; --stock-hover:#ffffff; /* ticket card stock */
+  --film:#1c1e1f; --film-hover:#2c2f30; --on-film:#f4f5f5; --film-muted:#8f9697;
+  --sprocket:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 7'%3E%3Crect x='2.7' y='1.7' width='4.6' height='3.6' rx='.9' fill='%23e6e8e8'/%3E%3C/svg%3E"); /* holes painted in the paper color */
+  --safe-press:#c9302a; --ticket-hover:#d3d7d7; --scrim:rgba(30,34,35,.55);
+  --tint:grayscale(1) contrast(1.08) brightness(1.02); /* frames develop from black-and-white into color */
+  /* paper texture: supplied tile, exported at 2x, laid as a 100px tile */
+  --grain:url("data:image/webp;base64,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");
+  /* type */
+  --display:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --ui:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Fragment Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  --fs-label:.75rem; --fs-sm:.875rem; --fs-body:1rem; --fs-title:1.75rem;
+  --fs-hero:clamp(4rem,17.2vw,5.2rem); --fs-rank:clamp(4rem,19vw,5.5rem);
+  /* space — 4px base */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+  --r:2px;
+  color-scheme:light;
+}
+html,body{background:var(--ink);color:var(--text)}
+body{background-size:100px 100px;font-family:var(--ui);font-size:var(--fs-body);line-height:1.55;min-height:100%;
+  background-image:var(--grain)}
+.wrap{max-width:560px;margin:0 auto;padding-block:var(--s3) var(--s7);
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;
+  transition:background-color 150ms ease-out,border-color 150ms ease-out,color 150ms ease-out,transform 120ms ease-out}
+button:active:not(:disabled){transform:translateY(1px)}
+:focus-visible{outline:2px solid var(--safe-hi);outline-offset:3px;border-radius:var(--r)}
+/* the ring is for keyboard travel only: hidden whenever the last input was a tap or click */
+html[data-input="pointer"] :focus-visible{outline:none}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);padding-block:var(--s2)}
+.brand{font-family:var(--display);font-style:italic;font-size:1.5rem;line-height:1;display:flex;align-items:center;gap:var(--s2);color:var(--text-hi)}
+.brand i{width:8px;height:8px;border-radius:50%;background:var(--safe)}
+.listbtn{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;min-height:44px;
+  padding:var(--s2) var(--s3);border:1px solid var(--ctl);border-radius:var(--r);color:var(--text)}
+.listbtn:hover{border-color:var(--muted)}
+.listbtn[aria-pressed="true"]{background:var(--safe);border-color:var(--safe);color:var(--on-safe)}
+.listbtn b{font-weight:400;font-variant-numeric:tabular-nums}
+
+/* the sentence */
+.sentence{font-family:var(--display);font-style:italic;font-size:var(--fs-hero);line-height:1.4;color:var(--text-hi);
+  margin:var(--s6) 0 var(--s6);text-wrap:pretty;max-width:22ch}
+.tok{display:inline-block;font-family:var(--mono);font-style:normal;font-size:.42em;letter-spacing:.08em;text-transform:uppercase;
+  line-height:1;vertical-align:.2em;padding:1em .85em;--hw:20px;--hh:14px;max-width:100%;box-sizing:border-box}
+.sentence .tok{line-height:1.2;text-align:left;margin-block:4px}
+.tok .x{margin-left:.6em;opacity:.7}
+.phrase{font:inherit;color:inherit;padding:0;text-align:left;text-decoration:underline;text-decoration-color:var(--safe);
+  text-decoration-thickness:2px;text-underline-offset:.16em}
+.phrase:hover{text-decoration-color:var(--safe-hi)}
+
+/* mood contact sheet */
+.sheet{display:grid;gap:var(--s5)}
+.row{display:grid;gap:var(--s2)}
+.row h2{display:flex;justify-content:space-between;gap:var(--s3);margin:0;padding-bottom:var(--s2);border-bottom:1px solid var(--line-soft);
+  font-family:var(--mono);font-weight:400;font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.moods{display:flex;flex-wrap:wrap;gap:var(--s3)}
+.ticket{position:relative;isolation:isolate;display:inline-flex;flex:1 1 auto;align-items:stretch;min-height:72px;padding:0 0 0 20px;color:var(--text-hi);
+  font-family:var(--mono);font-size:1.125rem;letter-spacing:.05em;text-transform:uppercase;--notch:9px;
+  transition:transform 150ms ease-out}
+.ticket .lbl{flex:1;align-self:center;padding:var(--s4) 0;text-align:left}
+/* the stub: perforated off the right end */
+.ticket .stub{flex:none;width:46px} /* spacer for the stub; the perforation itself is drawn on the ticket layer */
+/* two layers: a charcoal edge, then the ticket stock 1px inside it; both notched at the sides */
+.ticket::before,.ticket::after{content:"";position:absolute;z-index:-1;border-radius:3px;
+  -webkit-mask:radial-gradient(circle at 0 50%,transparent var(--notch),#000 calc(var(--notch) + .5px)) left/51% 100% no-repeat,
+               radial-gradient(circle at 100% 50%,transparent var(--notch),#000 calc(var(--notch) + .5px)) right/51% 100% no-repeat;
+          mask:radial-gradient(circle at 0 50%,transparent var(--notch),#000 calc(var(--notch) + .5px)) left/51% 100% no-repeat,
+               radial-gradient(circle at 100% 50%,transparent var(--notch),#000 calc(var(--notch) + .5px)) right/51% 100% no-repeat}
+.ticket::before{inset:0;background:var(--ctl)}
+.ticket::before,.ticket::after{border-radius:5px}
+.ticket::after{inset:1px;background-color:var(--stock);transition:background-color 150ms ease-out;
+  background-image:repeating-linear-gradient(to bottom,var(--ctl) 0 5px,transparent 5px 10px);
+  background-size:2px calc(100% - 12px);background-position:right 24px center;background-repeat:no-repeat}
+.ticket:hover{transform:translateY(-2px)}
+.ticket:hover::after{background-color:var(--stock-hover)}
+
+/* film strip: the dark stock sits on a layer behind the label, so the focus ring is never clipped */
+.film{position:relative;isolation:isolate;color:var(--on-film);background:none;border:0}
+.film::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:3px;transition:background-color 150ms ease-out;
+  background-color:var(--film);
+  background-image:var(--sprocket),var(--sprocket);
+  background-size:var(--hw) var(--hh);
+  background-position:left top,left bottom;
+  background-repeat:round no-repeat}
+button.film:hover::before,button.film:active::before{background-color:var(--film-hover)}
+.ticket:disabled{opacity:.35;cursor:default}
+
+/* decks */
+.deck{display:flex;gap:var(--s3);overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;
+  margin-inline:calc(-1 * max(16px, env(safe-area-inset-left, 0px))) calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding:var(--s2) max(16px, env(safe-area-inset-right, 0px)) var(--s6) max(16px, env(safe-area-inset-left, 0px));
+  scroll-padding-inline:max(16px, env(safe-area-inset-left, 0px))}
+.deck::-webkit-scrollbar{display:none}
+.deck>*{flex:0 0 86%;max-width:420px;scroll-snap-align:start;scroll-snap-stop:always;min-width:0}
+.deck:focus-visible{outline-offset:-2px}
+.picks>*{flex-basis:88%;max-width:440px}
+
+/* developing: everything safelight-red until it lands in front of you */
+.pick .art img{filter:var(--tint);transition:filter 1.2s ease-out .1s}
+.pick.dev .art img{filter:none}
+
+/* theme cards */
+.theme{display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:0;overflow:hidden;
+  background:var(--card);border-radius:var(--card-r);box-shadow:var(--card-shadow);transition:transform 150ms ease-out,box-shadow 150ms ease-out}
+.theme:hover{transform:translateY(-2px);box-shadow:var(--card-shadow-hi)}
+.strip{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:repeat(6,1fr);gap:3px;background:var(--card);height:clamp(260px,46vh,420px)}
+.strip img{display:block;width:100%;height:100%;object-fit:cover;background:var(--ink-3)}
+.strip img{min-height:0}
+.strip img:nth-child(1){grid-column:1;grid-row:1 / span 4}
+.strip img:nth-child(2){grid-column:1;grid-row:5 / span 2}
+.strip img:nth-child(3){grid-column:2;grid-row:1 / span 3}
+.strip img:nth-child(4){grid-column:2;grid-row:4 / span 3}
+/* fewer than four titles: let the frames share the space */
+.strip img:only-child{grid-column:1 / span 2;grid-row:1 / span 6}
+.strip img:nth-child(2):last-child{grid-column:2;grid-row:1 / span 6}
+.strip img:nth-child(3):last-child{grid-row:1 / span 6}
+.theme .p{font-family:var(--display);font-style:italic;font-size:clamp(2.1rem,9vw,2.6rem);line-height:1.02;color:var(--text-hi);padding:var(--s4) var(--s5) 0;text-wrap:balance}
+.theme .s{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.04em;color:var(--muted);padding:var(--s2) var(--s5) var(--s5)}
+
+/* deck controls */
+.dots{display:flex;gap:0;margin:0 0 var(--s2) -7px}
+.dots button{width:22px;height:22px;display:grid;place-items:center}
+.dots button::after{content:"";width:12px;height:3px;background:var(--line);transition:background-color 200ms ease-out,width 200ms ease-out}
+.dots button[aria-current="true"]::after{background:var(--safe-hi);width:18px}
+.deckbar{display:flex;align-items:center;gap:var(--s3);margin-top:var(--s2);font-family:var(--mono);font-size:var(--fs-label);color:var(--muted);font-variant-numeric:tabular-nums}
+.deckbar button{width:44px;height:44px;border-radius:var(--r);border:1px solid var(--ctl);color:var(--text)}
+.deckbar button:hover:not(:disabled){border-color:var(--muted)}
+.deckbar button:disabled{opacity:.3;cursor:default}
+.deckbar .pos{min-width:6.5em;text-align:center}
+
+/* top-5 picks */
+.pick{display:flex;flex-direction:column;gap:var(--s3);background:var(--ink-2);border:0;border-radius:14px;box-shadow:0 10px 34px rgba(10,12,13,.28);
+  overflow:hidden;padding:0 var(--s4) var(--s4)}
+.pick .wedge{margin-top:auto;padding-top:var(--s3);border-top:1px solid var(--line-soft)}
+.pick .watchrow{padding-top:var(--s1)}
+.pick .art{margin:0 calc(-1 * var(--s4));overflow:hidden;background:var(--ink-3);border-bottom:1px solid var(--line-soft)}
+.pick .art img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.ph{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:var(--s3)}
+.rank{font-family:var(--display);font-style:italic;font-size:var(--fs-rank);line-height:.78;color:var(--safe);margin-top:2px}
+.pick h3{font-family:var(--display);font-weight:400;font-size:var(--fs-title);line-height:1.1;margin:0;color:var(--text-hi);text-wrap:balance}
+.pick .meta{margin-top:var(--s1)}
+.blurb{margin:0;max-width:65ch}
+.wedge{display:grid;gap:var(--s2)}
+.wedge .wl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase;color:var(--text)}
+.wedge .wl b{font-weight:400;color:var(--safe-hi);font-variant-numeric:tabular-nums}
+.cells{display:grid;grid-template-columns:repeat(10,1fr);gap:2px}
+.cells i{height:10px;border:1px solid var(--line-soft)}
+.cells i.on{border-color:transparent;background:color-mix(in srgb,var(--safe-hi) calc(var(--i) * 9% + 10%),var(--ink-3))}
+
+/* list view */
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s3);margin-bottom:var(--s3)}
+.bar .count{font-family:var(--mono);font-size:var(--fs-label);color:var(--muted);font-variant-numeric:tabular-nums}
+.sort{display:flex;border:1px solid var(--ctl);border-radius:var(--r)}
+.sort button{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.04em;padding:var(--s2) var(--s3);color:var(--muted)}
+.sort button+button{border-left:1px solid var(--ctl)}
+.sort button:hover{color:var(--text)}
+.sort button[aria-pressed="true"]{background:var(--safe);color:var(--on-safe)}
+.card{display:grid;gap:var(--s2);background:var(--ink-2);border:1px solid var(--line-soft);border-radius:var(--r);overflow:hidden;padding:0 var(--s4) var(--s4)}
+.shot{display:block;width:calc(100% + 2 * var(--s4));max-width:none;height:auto;margin:0 calc(-1 * var(--s4)) var(--s2);aspect-ratio:16/9;object-fit:cover;background:var(--ink-3)}
+.card .h{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s3)}
+.card h3{font-family:var(--display);font-weight:400;font-size:var(--fs-title);line-height:1.1;margin:0;color:var(--text-hi);text-wrap:balance}
+
+/* shared title details */
+.meta{margin:0;font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--safe-hi);font-variant-numeric:tabular-nums}
+.tags{margin:0;font-family:var(--mono);font-size:var(--fs-label);color:var(--muted)}
+.save{flex:none;width:44px;height:44px;border-radius:var(--r);border:1px solid var(--ctl);font-size:1.1rem;line-height:1;color:var(--muted)}
+.save:hover{border-color:var(--muted);color:var(--text)}
+.save[aria-pressed="true"]{background:var(--safe);border-color:var(--safe);color:var(--on-safe)}
+.also{display:flex;flex-wrap:wrap;gap:var(--s1);align-items:center;font-family:var(--mono);font-size:var(--fs-label);color:var(--muted)}
+.also button{padding:var(--s1) var(--s2);border:1px solid var(--ctl);border-radius:var(--r);color:var(--text);text-transform:uppercase;letter-spacing:.06em}
+.also button:hover{border-color:var(--line)}
+.watchrow{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4)}
+.watch{font-size:var(--fs-sm);font-weight:600;color:var(--text);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:2px}
+.watch:hover{border-color:var(--safe-hi)}
+
+/* way-finding */
+.after{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s5);margin-top:var(--s5)}
+.seeall{font-size:var(--fs-sm);font-weight:600;color:var(--text);border-bottom:1px solid var(--line);padding-bottom:2px}
+.seeall:hover{border-color:var(--safe-hi)}
+.back{font-size:var(--fs-sm);color:var(--muted);padding:var(--s2) 0}
+.back:hover{color:var(--text)}
+.empty{color:var(--muted);padding:var(--s6) var(--s4);border:1px dashed var(--line);border-radius:var(--r)}
+.empty strong{display:block;font-family:var(--display);font-style:italic;font-weight:400;font-size:var(--fs-title);color:var(--text-hi);margin-bottom:var(--s2)}
+.note{margin-top:var(--s7);padding-top:var(--s4);border-top:1px solid var(--line-soft);font-family:var(--mono);font-size:var(--fs-label);color:var(--muted);line-height:1.6;max-width:60ch}
+
+.gem{justify-self:start;display:inline-block;margin-top:var(--s1);padding:2px var(--s2);border:1px solid var(--safe-hi);border-radius:var(--r);
+  font-family:var(--mono);font-size:.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--safe-hi)}
+.ph .gem{margin:var(--s2) 0 0}
+.loading{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+#stage:focus{outline:none}
+
+/* shared bits */
+.chips{display:flex;gap:var(--s2);overflow-x:auto;scrollbar-width:none;padding-block:var(--s1);
+  margin-inline:calc(-1 * max(16px, env(safe-area-inset-left, 0px))) calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-inline:max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px))}
+.chips::-webkit-scrollbar{display:none}
+@media (min-width:640px){#stage .chips{flex-wrap:wrap;overflow:visible;margin-inline:0;padding-inline:0}}
+.chip{flex:none;min-height:44px;display:inline-flex;align-items:center;gap:var(--s2);padding:0 var(--s3);border:1px solid var(--ctl);border-radius:var(--r);
+  font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--text);background:var(--ink-2)}
+.chip:hover{background:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--safe);border-color:var(--safe);color:var(--on-safe)}
+.chip .n{color:var(--muted);font-variant-numeric:tabular-nums}
+.chip[aria-pressed="true"] .n{color:var(--on-safe)}
+.more{display:block;width:100%;min-height:48px;margin-top:var(--s4);border:1px dashed var(--ctl);border-radius:var(--r);
+  font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+.more:hover{border-style:solid}
+.matchword{font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--safe-hi)}
+img.dev-on{filter:none!important}
+
+/* ---------- results: contact sheet — every title as a small frame, details in a modal ---------- */
+html[data-view="sheet"] .wrap{max-width:1100px}
+html[data-view="sheet"] .sentence{max-width:26ch}
+.grid{list-style:none;margin:var(--s4) 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s5) var(--s3)}
+@media (min-width:640px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:960px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.frame{display:grid;gap:var(--s2);width:100%;text-align:left;padding:0;border-radius:var(--r)}
+.frame .fi{position:relative;display:block;background:var(--ink-3);border:1px solid var(--line);overflow:hidden}
+.frame img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;
+  filter:var(--tint);transition:filter 900ms ease-out}
+.frame img.dev-on{filter:none;transition-delay:calc(var(--d,0) * 140ms)}
+.frame:hover .fi{border-color:var(--ctl)}
+.edge{display:flex;justify-content:space-between;gap:var(--s2);font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.edge b{font-weight:400;color:var(--safe-hi)}
+.frame .ft{font-family:var(--display);font-size:1.25rem;line-height:1.15;color:var(--text-hi);text-wrap:balance}
+.frame .fsaved{color:var(--safe-hi)}
+dialog.detail{width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 48px);padding:0;border:1px solid var(--ctl);border-radius:var(--r);
+  background:var(--ink-2);color:var(--text);overflow:auto}
+dialog.detail::backdrop{background:var(--scrim)}
+/* the reel: a story's titles as full cards in a pop-up, swiped best match first */
+dialog.reel{width:100%;max-width:none;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:transparent;color:var(--text);overflow:hidden}
+dialog.reel[open]{display:flex;flex-direction:column}
+dialog.reel::backdrop{background:rgba(22,25,26,.66);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.rhead{position:relative;display:grid;justify-items:center;
+  padding:calc(var(--s6) + env(safe-area-inset-top,0px)) calc(56px + env(safe-area-inset-right,0px)) var(--s5) calc(56px + env(safe-area-inset-left,0px))}
+.rhead .eyebrow{margin:0;font-family:var(--display);font-style:italic;font-weight:400;font-size:clamp(1.8rem,8vw,2.4rem);line-height:1.1;color:#fff;text-align:center;text-wrap:balance}
+.rclose{position:absolute;top:calc(var(--s4) + env(safe-area-inset-top,0px));right:calc(var(--s3) + env(safe-area-inset-right,0px));
+  width:44px;height:44px;display:grid;place-items:center;border-radius:50%;font-family:var(--mono);font-size:1.1rem;line-height:1;color:#fff;background:rgba(255,255,255,.14)}
+.rclose:hover{background:rgba(255,255,255,.24)}
+.rbody{flex:1;min-height:0;display:flex;flex-direction:column;padding-bottom:calc(var(--s5) + env(safe-area-inset-bottom,0px))}
+.rbody .deck{flex:1;min-height:0;align-items:flex-start;margin:0;padding:0 10vw var(--s5);scroll-padding-inline:10vw}
+.rbody .deck>.pick{box-sizing:border-box;flex:0 0 80vw;max-width:460px;max-height:100%;overflow:hidden;scroll-snap-align:center}
+.rbody .deck>.pick.scrolls{overflow-y:auto;overscroll-behavior:contain}
+@media (min-width:700px){.rbody .deck{padding-inline:calc(50% - 230px);scroll-padding-inline:calc(50% - 230px)}.rbody .deck>.pick{flex-basis:460px}}
+.rbody .deckbar{justify-content:center}
+.rbody .deck>.dealcard{box-sizing:border-box;flex:0 0 80vw;max-width:460px;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--s4);
+  padding:var(--s5);border-radius:14px;border:1.5px dashed rgba(255,255,255,.45);background:rgba(15,18,19,.35);text-align:center;color:#fff}
+@media (min-width:700px){.rbody .deck>.dealcard{flex-basis:460px}}
+.dealcard p{margin:0;max-width:24ch;font-family:var(--display);font-style:italic;font-size:1.5rem;line-height:1.25;text-wrap:balance}
+.dealbtn{min-height:48px;padding:0 var(--s5);border-radius:999px;background:var(--safe);color:var(--on-safe);font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.08em;text-transform:uppercase}
+.dealbtn:hover{background:var(--safe-hi)}
+.rbody .deckbar .pos{color:rgba(255,255,255,.8)}
+.rbody .deckbar button{color:#fff;border-color:rgba(255,255,255,.55)}
+/* touch screens just swipe; arrows are for mouse users */
+@media (hover:none){.deckbar{display:none}}
+dialog.detail .pick{border:0;flex-basis:auto}
+dialog.detail .pick .art img{filter:none}
+.dclose{position:sticky;top:0;z-index:1;display:flex;justify-content:flex-end;padding:var(--s2);background:var(--ink-2)}
+.dclose button{min-height:44px;padding:0 var(--s3);border:1px solid var(--ctl);border-radius:var(--r);font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase}
+
+
+/* compact sentence: slides in once the big one scrolls away */
+.mini{position:fixed;top:0;left:0;right:0;z-index:20;background-color:var(--ink);background-image:var(--grain);background-size:100px 100px;
+  border-bottom:1px solid var(--line);box-shadow:0 6px 16px rgba(20,24,25,.08);
+  padding:calc(var(--s2) + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) var(--s2) max(16px,env(safe-area-inset-left,0px));
+  transform:translateY(-110%);transition:transform 200ms ease-out}
+.mini.on{transform:none}
+.minis{max-width:1100px;margin:0 auto;font-family:var(--display);font-style:italic;font-size:1.2rem;line-height:1.75;color:var(--text-hi);text-wrap:pretty}
+.minis::-webkit-scrollbar{display:none}
+.minis .tok{font-size:.6em;padding:.95em .75em;--hw:8px;--hh:5px;vertical-align:.2em;margin:2px 0}
+.minis .phrase{text-decoration-thickness:1.5px}
+html.pinned .sentence{display:none}
+html.choosing .top{display:none}
+.sentence.reveal{animation:reveal 260ms ease-out}
+@keyframes reveal{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+.mini{cursor:pointer}
+.pullhint{position:fixed;left:50%;top:calc(var(--mini-h,56px) + var(--s3));z-index:19;display:flex;align-items:center;gap:var(--s2);
+  padding:6px 12px;border-radius:999px;background:var(--film);color:var(--on-film);font-family:var(--mono);font-size:var(--fs-label);
+  letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;opacity:0;transform:translateX(-50%);pointer-events:none}
+.pullhint .pa{display:inline-block;transition:transform .2s ease-out}
+.pullhint.ready .pa{transform:rotate(180deg)}
+html.pinned .wrap{padding-top:calc(var(--mini-h,56px) + var(--s3))}
+html.pinned #stage{margin-top:var(--s5)}
+/* seen it: flick a card up and it's gone for good */
+.pfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--s2) var(--s3)}
+.seenbtn{min-height:44px;display:inline-flex;align-items:center;gap:var(--s1);padding:0 var(--s3);border:1px solid var(--ctl);border-radius:999px;
+  font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.06em;text-transform:uppercase;color:var(--text)}
+.seenbtn:hover{background:var(--ink-3)}
+.rbody .pick{touch-action:pan-x}
+.rbody .pick.scrolls{touch-action:auto}
+.flywrap{position:fixed;z-index:6;overflow:hidden;border-radius:14px;background:var(--ink-2);pointer-events:none;transform-origin:50% 60%;
+  box-shadow:0 18px 48px rgba(10,12,13,.35)}
+.flywrap>.pick.flyinner{position:relative;width:100%;max-height:none;max-width:none;overflow:visible;box-shadow:none;border-radius:0;flex:none;box-sizing:border-box}
+.pick.flying{position:fixed;z-index:6;margin:0;box-sizing:border-box;flex:none;max-height:none;overflow:hidden;clip-path:inset(0 round 14px);pointer-events:none;
+  transform-origin:50% 60%;will-change:transform;box-shadow:0 18px 48px rgba(10,12,13,.35)}
+.toast{position:absolute;left:50%;bottom:calc(var(--s5) + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:5;
+  display:flex;align-items:center;gap:var(--s4);padding:var(--s2) var(--s2) var(--s2) var(--s4);border-radius:999px;
+  background:var(--film);color:var(--on-film);font-family:var(--mono);font-size:var(--fs-label);letter-spacing:.04em;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.toast[hidden]{display:none}
+@media (hover:hover){.toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}}
+.toast button{min-height:36px;padding:0 var(--s3);border-radius:999px;background:var(--on-film);color:var(--film);font:inherit;text-transform:uppercase;letter-spacing:.06em}
+.seenline{margin:var(--s5) 0 0;font-size:var(--fs-sm);color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.mini{transition:none}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}.ticket:hover{transform:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><i aria-hidden="true"></i>Mood Reel</div>
+    <button class="listbtn" id="listbtn" data-act="list" aria-pressed="false">My list · <b id="listn">0</b></button>
+  </header>
+  <p class="sentence" id="sentence"></p>
+  <div class="mini" id="mini" inert><p class="minis" id="minis"></p></div>
+  <main id="stage" tabindex="-1"><p class="loading">Loading the catalog…</p></main>
+  <dialog class="detail" id="detail" aria-label="Title details"></dialog>
+  <dialog class="reel" id="reel" aria-labelledby="reel-title"></dialog>
+  <p class="sr" id="status" role="status" aria-live="polite"></p>
+  <p class="note">Data from TMDB and JustWatch. This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+</div>
+
+<script>
+// [title, year, m|s, runtime(min, movies only), one-liner]
+let T={},G={};
+
+// Netflix-style tags: "moods", "story types", setting
+const MOODS=[["understated","🍂"],["emotional","💧"],["heartfelt","💛"],["feel-good","☀️"],["romantic","🌹"],["witty","💬"],
+["goofy","🤪"],["quirky","🦩"],["offbeat","🎈"],["irreverent","😏"],["exciting","⚡"],["suspenseful","⏳"],["gritty","🧱"],
+["dark","🌑"],["ominous","🌫️"],["scary","👻"],["mind-bending","🌀"],["cerebral","🧠"],["imaginative","✨"],["inspiring","🏔️"]];
+const STORY={und:"underdog stories",per:"period pieces",real:"based on real life",who:"whodunits",heist:"heists and capers",
+rev:"revenge stories",coa:"coming of age",surv:"survival stories",fam:"family dramas",rom:"love stories",work:"workplace stories",
+fish:"fish out of water",super:"ghosts and the supernatural",dys:"dystopias and futures",quest:"quests and adventures",
+con:"cons and grifts",crime:"crime and cartels",nature:"nature and science",food:"food and travel",sat:"satires",
+loop:"time-bending stories",mon:"monsters and myths",war:"war stories",frnd:"friendships",sport:"sports and competition",
+inv:"investigations",space:"space stories"};
+const STORY_ONE={und:"an underdog story",per:"a period piece",real:"a true story",who:"a whodunit",heist:"a heist",
+rev:"a revenge story",coa:"a coming-of-age story",surv:"a survival story",fam:"a family drama",rom:"a love story",work:"a workplace story",
+fish:"a fish-out-of-water story",super:"a ghost story",dys:"a dystopia",quest:"an adventure",con:"a con",crime:"a crime saga",
+nature:"a nature film",food:"a food and travel show",sat:"a satire",loop:"a time-bending story",mon:"a monster or myth",war:"a war story",
+frnd:"a friendship story",sport:"a sports story",inv:"an investigation",space:"a space story"};
+const EMOJI=Object.fromEntries(MOODS);
+const moodsOf=id=>G[id][0].split(" ");
+const storiesOf=id=>G[id][1]?G[id][1].split(" "):[];
+
+const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+             set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+const LOOK="darkroom";
+function setLook(l){document.documentElement.dataset.style=l}
+document.documentElement.lang="en";
+document.documentElement.dataset.input="pointer";
+addEventListener("pointerdown",()=>{document.documentElement.dataset.input="pointer"},{capture:true,passive:true});
+addEventListener("keydown",e=>{if(["Tab","ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key))document.documentElement.dataset.input="keyboard"},{capture:true});
+const S={pick:"fmt",shown:40,step:2,expanded:false,fmt:store.get("mr.fmt","any"),svc:store.get("mr.svc","any"),mood:null,theme:null,sort:"new",list:false,saved:new Set(store.get("mr.saved",[])),seen:new Set(store.get("mr.seen",[]))};
+const FMT={any:"anything",m:"a movie",s:"a series"};
+const NEXT={any:"m",m:"s",s:"any"};
+const SVC={n:["Netflix",t=>`https://www.netflix.com/search?q=${encodeURIComponent(t)}`],
+  p:["Prime Video",t=>`https://www.amazon.com/s?k=${encodeURIComponent(t)}&i=instant-video`],
+  h:["Hulu",t=>`https://www.hulu.com/search?q=${encodeURIComponent(t)}`],
+  b:["BritBox",t=>`https://www.amazon.com/s?k=${encodeURIComponent(t)}&i=instant-video`]};
+// BritBox comes through Prime Video, so it counts as Prime
+const onSvc=(id,c)=>T[id][10].includes(c)||(c==="p"&&T[id][10].includes("b"));
+const svcsOf=id=>{const s=T[id][10];return [...s].filter(c=>!(c==="b"&&s.includes("p")))};
+const SVC_LABEL={any:"any service",n:"Netflix",p:"Prime Video",h:"Hulu"};
+const SVC_NEXT={any:"n",n:"p",p:"h",h:"any"};
+const fitsBase=id=>T[id]&&(S.fmt==="any"||T[id][2]===S.fmt)&&(S.svc==="any"||onSvc(id,S.svc));
+const fits=id=>fitsBase(id)&&!S.seen.has(id); // titles marked as seen never come up again
+function watchLinks(id){const t=T[id][0];const svcs=svcsOf(id).sort((a,b)=>(b===S.svc||(S.svc==="p"&&b==="b"))-(a===S.svc||(S.svc==="p"&&a==="b")));
+  return `<div class="watchrow">${svcs.map(c=>`<a class="watch" href="${SVC[c][1](t)}" target="_blank" rel="noopener">Find on ${SVC[c][0]} ↗</a>`).join("")}</div>`}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const dur=m=>m>=60?`${Math.floor(m/60)}h ${m%60}m`:`${m}m`;
+const inMood=w=>Object.keys(G).filter(id=>fits(id)&&moodsOf(id).includes(w));
+
+// theme cards: group the mood's titles by story type; stragglers go in one last card
+function themesFor(w){
+  const ids=inMood(w),groups={};
+  ids.forEach(id=>storiesOf(id).forEach(k=>(groups[k]=groups[k]||[]).push(id)));
+  const cards=Object.entries(groups).filter(([,g])=>g.length>=2).sort((a,b)=>b[1].length-a[1].length)
+    .map(([k,g])=>({key:k,label:STORY[k],ids:g}));
+  const covered=new Set(cards.flatMap(c=>c.ids));
+  const rest=ids.filter(id=>!covered.has(id));
+  if(rest.length) cards.push({key:"_more",label:`a few more ${w} picks`,ids:rest});
+  return cards;
+}
+const currentTheme=()=>S.mood&&S.theme?themesFor(S.mood).find(c=>c.key===S.theme):null;
+
+function sentence(){
+  // built one step at a time, like Libby: each choice is a tag first, then becomes a film pill in the sentence
+  if(S.pick==="fmt"&&!S.list) return "Find me…";
+  let h=`Find me <button class="tok film" data-act="fmt" aria-label="${FMT[S.fmt]}. Change format">${FMT[S.fmt]}</button>`;
+  if(S.pick==="svc"&&!S.list) return h+" on…";
+  h+=` on <button class="tok film" data-act="svc" aria-label="${SVC_LABEL[S.svc]}. Change streaming service">${SVC_LABEL[S.svc]}</button> `;
+  if(S.list) return h+`that I <button class="tok film" data-act="list">saved</button>`;
+  if(!S.mood) return h+"that is…";
+  h+=`that is <button class="tok film" data-act="clearmood" aria-label="Pick a different mood">${S.mood}<span class="x">✕</span></button> and`;
+  const th=currentTheme();
+  if(!th) return h+"…";
+  const one=th.key==="_more"?"something else":STORY_ONE[th.key]||th.label;
+  return h+` <button class="phrase" data-act="cleartheme" aria-label="Pick a different theme">${esc(one)}</button>`;
+}
+
+function viewPick(step){
+  const opts=step==="fmt"?[["m","a movie"],["s","a series"],["any","anything"]]:[["n","Netflix"],["p","Prime Video"],["h","Hulu"],["any","any service"]];
+  return `<div class="sheet picks1"><section class="row"><div class="moods">${opts.map(([v,l])=>
+    `<button class="ticket" data-set${step}="${v}"><span class="lbl">${l}</span><span class="stub" aria-hidden="true"></span></button>`).join("")}</div></section></div>`;
+}
+function staggerTickets(){if(RM())return;document.querySelectorAll("#stage .ticket").forEach((t,i)=>t.animate(
+  [{opacity:0,transform:"translateY(-14px)"},{opacity:1,transform:"none"}],{duration:320,delay:60+Math.min(i,16)*18,easing:"cubic-bezier(.2,.8,.2,1)",fill:"backwards"}))}
+// the tapped tag flies up into the sentence and turns into its film pill
+function flyToPill(from,sel){const pill=document.querySelector(`#sentence ${sel}`);if(!pill||!from||RM())return;
+  const t=pill.getBoundingClientRect();
+  pill.animate([{transform:`translate(${from.left-t.left}px,${from.top-t.top}px) scale(${from.width/t.width},${from.height/t.height})`,opacity:.6},{transform:"none",opacity:1}],
+    {duration:380,easing:"cubic-bezier(.2,.8,.2,1)"});pill.style.transformOrigin="0 0";setTimeout(()=>pill.style.transformOrigin="",400)}
+function viewMoods(){
+  const ROWS=[["Light and easy",["feel-good","goofy","witty","romantic","heartfelt","quirky","offbeat","irreverent"]],
+              ["Slow and stirring",["understated","emotional","cerebral","inspiring","imaginative"]],
+              ["Tense and dark",["exciting","suspenseful","gritty","dark","ominous","scary","mind-bending"]]];
+  return `<div class="sheet">${ROWS.map(([label,ws])=>`<section class="row"><h2><span>${label}</span></h2>
+    <div class="moods">${ws.map(w=>{const n=inMood(w).length;
+      return `<button class="ticket" data-mood="${w}" ${n?"":"disabled"}><span class="lbl">${w}</span><span class="stub" aria-hidden="true"></span></button>`}).join("")}</div></section>`).join("")}</div>`;
+}
+
+function viewThemes(){
+  const cards=themesFor(S.mood),all=inMood(S.mood).length;
+  return `<div class="deck" data-deck tabindex="0" aria-label="Themes, swipe sideways">${cards.map(c=>{
+    const places=[...new Set(c.ids.map(id=>G[id][2]))].slice(0,2);
+    return `<button class="theme" data-theme="${c.key}"><span class="strip" aria-hidden="true">${c.ids.filter(fits).sort((a,b)=>score(b,c.key)-score(a,c.key)||T[b][8]-T[a][8]||T[b][1]-T[a][1]).slice(0,4)
+      .map(id=>`<img data-hi="${id}" alt="" width="640" height="360">`).join("")}</span><span class="p">${esc(c.label)}</span>
+      <span class="s">${c.ids.length} ${c.ids.length===1?"title":"titles"} · ${esc(places.join(" · "))}</span></button>`}).join("")}
+</div>${deckbar(cards.length)}
+  <div class="after"><button class="seeall" data-theme="_all">See all ${all} ${S.mood} titles</button>
+  <button class="back" data-act="clearmood">← Other moods</button></div>`;
+}
+
+function sorted(ids){
+  const a=[...ids];
+  if(S.sort==="new") a.sort((x,y)=>T[y][1]-T[x][1]);
+  if(S.sort==="az") a.sort((x,y)=>T[x][0].replace(/^The /,"").localeCompare(T[y][0].replace(/^The /,"")));
+  if(S.sort==="short") a.sort((x,y)=>(T[x][3]||999)-(T[y][3]||999));
+  return a;
+}
+
+function card(id){
+  const [t,y,k,rt,b]=T[id];const on=S.saved.has(id);
+  const others=moodsOf(id).filter(w=>w!==S.mood);
+  const kinds=storiesOf(id).map(s=>STORY[s]).join(" · ");
+  return `<article class="card">
+    <img class="shot" data-art="${id}" alt="" loading="lazy" width="480" height="270">
+    ${T[id][8]?`<span class="gem">Hidden gem</span>`:""}<div class="h"><h3>${esc(t)}</h3>
+      <button class="save" data-save="${id}" aria-pressed="${on}" aria-label="${on?"Remove from":"Add to"} my list">${on?"♥":"♡"}</button></div>
+    <p class="meta">${k==="m"?"Movie":"Series"} · ${y}${k==="m"?" · "+dur(rt):""}</p>
+    <p class="blurb">${esc(b)}</p>
+    <p class="tags">${kinds?esc(kinds)+" · ":""}set in ${esc(G[id][2])}</p>
+    ${others.length?`<div class="also">Also ${others.map(w=>`<button data-mood="${w}">${w}</button>`).join("")}</div>`:""}
+    ${watchLinks(id)}
+  </article>`;
+}
+
+function viewResults(ids,backLabel,backAct){
+  const list=sorted(ids.filter(fits));
+  const sorts=[["new","Newest"],["az","A–Z"],["short","Shortest"]];
+  const bar=`<div class="bar"><span class="count">${list.length} ${list.length===1?"title":"titles"}</span>
+    <div class="sort" role="group" aria-label="Sort">${sorts.map(([v,l])=>`<button data-sort="${v}" aria-pressed="${S.sort===v}">${l}</button>`).join("")}</div></div>`;
+  const body=list.length?`<div class="deck" data-deck tabindex="0" aria-label="Titles, swipe sideways">${list.map(card).join("")}</div>${deckbar(list.length)}`:
+    `<div class="empty"><strong>Nothing saved yet</strong>Tap ♡ on any title to add it to your list.</div>`;
+  return bar+body+`<div class="after"><button class="back" data-act="${backAct}">${backLabel}</button></div>`;
+}
+
+const deckbar=n=>n>1?`<div class="deckbar"><button data-nav="-1" aria-label="Previous" disabled>←</button><span class="pos">1 of ${n}</span><button data-nav="1" aria-label="Next">→</button></div>`:"";
+function step(deck){const c=deck.children;return c.length>1?c[1].offsetLeft-c[0].offsetLeft:deck.clientWidth}
+const activeDeck=()=>document.querySelector("dialog[open] [data-deck]")||document.querySelector("#stage [data-deck]");
+function wireDeck(deck){
+  if(!deck)return;
+  const bar=deck.nextElementSibling&&deck.nextElementSibling.classList.contains("deckbar")?deck.nextElementSibling:null;
+  const dots=deck.previousElementSibling&&deck.previousElementSibling.classList.contains("dots")?[...deck.previousElementSibling.children]:null;
+  const update=()=>{const n=deck.children.length;if(!n)return;const i=Math.min(n-1,Math.round(deck.scrollLeft/step(deck)));
+    if(dots)dots.forEach((d,j)=>d.setAttribute("aria-current",j===i));
+    if(deck.children[i])deck.children[i].classList.add("dev");
+    hydrateNear(deck,i);
+    if(!bar)return;
+    bar.querySelector(".pos").textContent=`${i+1} of ${n}`;
+    bar.children[0].disabled=i===0;bar.children[2].disabled=i>=n-1};
+  deck.addEventListener("scroll",()=>requestAnimationFrame(update),{passive:true});
+  deck.addEventListener("keydown",e=>{if(e.key==="ArrowRight"||e.key==="ArrowLeft"){e.preventDefault();nav(e.key==="ArrowRight"?1:-1)}});
+  update();
+}
+function nav(dir){const deck=activeDeck();if(!deck)return;
+  deck.scrollBy({left:dir*step(deck),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})}
+function score(id,theme=S.theme){
+  const m=moodsOf(id).indexOf(S.mood),st=storiesOf(id).indexOf(theme);
+  const nm=moodsOf(id).length,ns=storiesOf(id).length;
+  // main mood counts most, then main story type; focused titles (fewer tags) and hidden gems get a nudge
+  return Math.min(100,58+(m===0?22:m===1?13:5)+(st===0?10:st>0?4:0)+(nm===1?4:nm===2?2:0)+(ns<=1&&st===0?2:0)+(T[id][8]?4:0));
+}
+const matchLabel=v=>v>=95?"Perfect match":v>=85?"Strong match":"Good match";
+function pick(id,rank,v){
+  const [t,y,k,rt,b]=T[id];const on=S.saved.has(id);
+  const kinds=storiesOf(id).map(x=>STORY[x]).join(" · ");const lit=Math.round(v/10);
+  return `<article class="pick" data-id="${id}">
+    <div class="art"><img data-art="${id}" alt="" width="480" height="270"></div>
+    <div class="ph"><span class="rank" aria-hidden="true">${rank}</span><span class="sr">Number ${rank}.</span>
+      <div><h3>${esc(t)}</h3>${T[id][8]?`<span class="gem">Hidden gem</span>`:""}<p class="meta">${k==="m"?"Movie · "+y+" · "+dur(rt):"Series · "+y}</p></div>
+      <button class="save" data-save="${id}" aria-pressed="${on}" aria-label="${on?"Remove from":"Add to"} my list">${on?"♥":"♡"}</button></div>
+    <p class="blurb">${esc(b)}</p>
+    <p class="tags">${kinds?esc(kinds)+" · ":""}set in ${esc(G[id][2])}</p>
+    <div class="wedge" role="img" aria-label="${matchLabel(v)}, ${v} percent">
+      <div class="wl"><span>${matchLabel(v)}</span><b>${v}%</b></div>
+      <div class="cells">${Array.from({length:10},(_,i)=>`<i class="${i<lit?"on":""}" style="--i:${i+1}"></i>`).join("")}</div></div>
+    <div class="pfoot">${watchLinks(id)}<button class="seenbtn" data-seen="${id}" aria-label="Seen it: hide ${esc(t)} from future results"><span aria-hidden="true">↑</span> Seen it</button></div>
+  </article>`;
+}
+
+function rankIds(ids){return ids.filter(fits).map(id=>[id,score(id)]).sort((a,b)=>b[1]-a[1]||T[b[0]][8]-T[a[0]][8]||T[b[0]][1]-T[a[0]][1])}
+const svcNames=id=>svcsOf(id).map(c=>SVC[c][0]).join(", ");
+const kindLine=id=>{const [,y,k,rt]=T[id];return k==="m"?`Movie · ${y}${rt?" · "+dur(rt):""}`:`Series · ${y}`};
+const moreBtn=(n)=>n>S.shown?`<button class="more" data-act="more">Show ${Math.min(40,n-S.shown)} more of ${n}</button>`:"";
+
+// results: contact sheet
+function frame(id,rank,v){const on=S.saved.has(id);
+  return `<li style="--d:${(rank-1)%S.step}"><button class="frame" data-open="${id}" aria-label="${esc(T[id][0])}${v!=null?", "+matchLabel(v).toLowerCase():""}${on?", in my list":""}. Open details">
+    <span class="fi"><img data-art="${id}" alt="" width="400" height="225"></span>
+    <span class="edge" aria-hidden="true"><span>${String(rank).padStart(2,"0")} · ${T[id][1]}</span><b>${on?"♥ ":""}${v!=null?matchLabel(v).replace(" match",""):""}</b></span>
+    <span class="ft" aria-hidden="true">${esc(T[id][0])}</span></button></li>`}
+function viewGrid(r,{count,back,backAct,empty}){
+  if(!r.length) return `<div class="empty"><strong>${empty[0]}</strong>${empty[1]}</div><div class="after"><button class="back" data-act="${backAct}">${back}</button></div>`;
+  return `<h2 class="sr">Results</h2><p class="count matchword" style="margin:0;color:var(--muted)">${count}</p>
+    <ol class="grid">${r.slice(0,S.shown).map(([id,v],i)=>frame(id,i+1,v)).join("")}</ol>${moreBtn(r.length)}
+    <div class="after"><button class="back" data-act="${backAct}">${back}</button></div>`;
+}
+function resultsPool(){return S.theme==="_all"?inMood(S.mood):currentTheme().ids}
+function announce(t){const el=document.getElementById("status");el.textContent="";setTimeout(()=>{el.textContent=t},60)}
+let io,io2;
+function observeImgs(){
+  if(io){io.disconnect();io2.disconnect()}
+  // load a little ahead of the viewport…
+  io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){loadImg(e.target);io.unobserve(e.target)}}),{rootMargin:"400px 0px"});
+  // …but only develop a frame once it is actually on screen and its image has arrived
+  io2=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const img=e.target;io2.unobserve(img);
+    const go=()=>requestAnimationFrame(()=>img.classList.add("dev-on"));img.complete&&img.src?go():img.addEventListener("load",go,{once:true})}),{threshold:.4});
+  document.querySelectorAll(".grid img[data-art]").forEach(i=>{io.observe(i);io2.observe(i)});
+}
+function render(){
+  if(S.mood&&S.theme&&S.theme!=="_all"&&!currentTheme()) S.theme=null;
+  if(S.mood&&!inMood(S.mood).length){S.mood=null;S.theme=null}
+  const st=document.getElementById("stage");
+  const results=S.list||(S.mood&&S.theme);
+  document.documentElement.dataset.view=results?"sheet":"flow";
+  S.step=window.innerWidth>=960?4:window.innerWidth>=640?3:2;
+  document.getElementById("sentence").innerHTML=S.theme==="_all"&&S.mood&&!S.list
+    ?sentence().replace(/ and…$/,` and <button class="phrase" data-act="cleartheme" aria-label="Pick a kind of story">anything</button>`):sentence();
+  document.getElementById("minis").innerHTML=document.getElementById("sentence").innerHTML;
+  if(typeof updateMini==="function")updateMini();
+  if(S.list){const r=[...S.saved].filter(id=>fitsBase(id)).reverse().map(id=>[id,null]);
+    st.innerHTML=viewGrid(r,{count:`${r.length} saved`,back:"← Back to moods",backAct:"list",empty:["Nothing saved yet","Open any title and tap ♡ to add it to your list."]})
+    +(S.seen.size?`<p class="seenline">${S.seen.size} ${S.seen.size===1?"title is":"titles are"} hidden because you've seen ${S.seen.size===1?"it":"them"}. <button class="phrase" data-act="unhide">Show ${S.seen.size===1?"it":"them"} again</button></p>`:"")}
+  else if(!S.mood) st.innerHTML=S.pick?viewPick(S.pick):viewMoods();
+  else if(!S.theme) st.innerHTML=viewThemes();
+  else {const r=rankIds(resultsPool());
+    st.innerHTML=viewGrid(r,{count:`${r.length} ${r.length===1?"title":"titles"} · best match first`,back:"← Other themes",backAct:"cleartheme",empty:[`Nothing here on ${SVC_LABEL[S.svc]}`,"Try another service or theme."]})}
+  wireDeck(document.querySelector("#stage [data-deck]"));hydrate();observeImgs();
+  document.getElementById("listn").textContent=S.saved.size;
+  document.getElementById("listbtn").setAttribute("aria-pressed",S.list);
+}
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b||b.disabled)return;
+  const d=b.dataset;let top=true;
+  if(d.open){openDetail(d.open,b);return}
+  if(d.theme){openReel(d.theme,b);return}
+  if(d.act==="more"){const n=S.shown;S.shown+=40;render();const items=document.querySelectorAll(".grid>li button");if(items[n])items[n].focus();return}
+  if(d.act==="close"){document.getElementById("detail").close();return}
+  if(d.act==="closereel"){document.getElementById("reel").close();return}
+  if(d.act==="deal"){const k=S.theme;lastSeen=null;openReel(k,reelFrom,true);return}
+  if(d.seen){if(document.getElementById("detail").open)document.getElementById("detail").close();markSeen(d.seen);return}
+  if(d.act==="undoseen"){undoSeen();return}
+  if(d.act==="unhide"){const n=S.seen.size;S.seen.clear();store.set("mr.seen",[]);render();announce(`${n} titles are back in your results`);return}
+  if(d.nav){nav(+d.nav);return}
+  if(d.go){const deck=activeDeck();deck.scrollTo({left:+d.go*step(deck),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});return}
+  if(d.act==="allintheme"){S.allInTheme=true;render();window.scrollTo({top:0});return}
+  if(d.act==="top5"){S.allInTheme=false;render();window.scrollTo({top:0});return}
+  if(d.act==="fmt"||d.act==="svc"){S.pick=d.act;S.mood=null;S.theme=null;S.list=false;S.expanded=false;render();window.scrollTo({top:0});staggerTickets();
+    document.getElementById("stage").focus({preventScroll:true});announce(d.act==="fmt"?"Pick a format":"Pick a service");return}
+  if(d.setfmt||d.setsvc){const from=b.getBoundingClientRect(),isF=!!d.setfmt;
+    if(isF){S.fmt=d.setfmt;store.set("mr.fmt",S.fmt);S.pick="svc"}else{S.svc=d.setsvc;store.set("mr.svc",S.svc);S.pick=null}
+    render();flyToPill(from,`[data-act="${isF?"fmt":"svc"}"]`);staggerTickets();
+    const first=document.querySelector("#stage .ticket");if(first)first.focus({preventScroll:true});
+    announce(isF?`${FMT[S.fmt]}. Now pick a service`:`${SVC_LABEL[S.svc]}. Now pick a mood`);return}
+  else if(d.act==="clearmood"){S.mood=null;S.theme=null;S.allInTheme=false;S.shown=40}
+  else if(d.act==="cleartheme"){S.theme=null;S.allInTheme=false;S.shown=40}
+  else if(d.act==="list"){S.list=!S.list;S.expanded=false}
+  else if(d.mood){S.list=false;S.mood=d.mood;S.theme=null;S.allInTheme=false;S.shown=40;S.expanded=false}
+  else if(d.theme){S.theme=d.theme;S.shown=40}
+  else if(d.sort){S.sort=d.sort;top=false}
+  else if(d.save){const id=d.save;S.saved.has(id)?S.saved.delete(id):S.saved.add(id);store.set("mr.saved",[...S.saved]);
+    announce(`${S.saved.has(id)?"Added":"Removed"} ${T[id][0]} ${S.saved.has(id)?"to":"from"} my list`);
+    {const on=S.saved.has(id);b.setAttribute("aria-pressed",on);b.textContent=on?"♥":"♡";
+      b.setAttribute("aria-label",(on?"Remove from":"Add to")+" my list");document.getElementById("listn").textContent=S.saved.size;return}
+}
+  else return;
+  render();
+  if(!document.body.contains(b)){const st=document.getElementById("stage");st.focus({preventScroll:true})}
+  if(S.mood&&d.mood) announce(`${S.mood}: ${themesFor(S.mood).length} kinds of story`);
+  if(d.theme) announce(`${rankIds(resultsPool()).length} titles, best match first`);
+  if(top) window.scrollTo({top:0,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+});
+setLook(LOOK);
+// show the compact sentence whenever the full one is scrolled out of view
+// once a mood is picked (or My list is open) the compact bar takes over for good, so the choices below stay in view
+let scrolledPast=false;
+function updateMini(){const m=document.getElementById("mini"),pinned=!!(S.mood||S.list)&&!S.expanded,on=pinned||scrolledPast;
+  document.documentElement.classList.toggle("pinned",pinned);
+  document.documentElement.classList.toggle("choosing",!!S.mood&&!S.list); // story step: no logo or My list
+  m.classList.toggle("on",on);m.inert=!on;
+  document.documentElement.style.setProperty("--mini-h",m.offsetHeight+"px")}
+new IntersectionObserver(([e])=>{scrolledPast=!e.isIntersecting&&e.boundingClientRect.top<0;updateMini()},{threshold:0}).observe(document.getElementById("sentence"));
+addEventListener("resize",updateMini);
+// pull down at the top (or tap the bar): start over at the mood tickets, keeping format and service
+function expandSentence(){if(!(S.mood||S.list))return;
+  S.mood=null;S.theme=null;S.list=false;S.shown=40;render();window.scrollTo({top:0});
+  const el=document.getElementById("sentence");el.classList.remove("reveal");void el.offsetWidth;el.classList.add("reveal");
+  if(!RM())document.querySelectorAll("#stage .ticket").forEach((t,i)=>t.animate(
+    [{opacity:0,transform:"translateY(-18px)"},{opacity:1,transform:"none"}],{duration:340,delay:80+Math.min(i,16)*18,easing:"cubic-bezier(.2,.8,.2,1)",fill:"backwards"}));
+  document.getElementById("stage").focus({preventScroll:true});announce("Back to moods");}
+// pull down at the top: the page follows the finger with resistance; let go past the line to go back to moods
+const pullHint=document.createElement("div");pullHint.className="pullhint";pullHint.setAttribute("aria-hidden","true");
+pullHint.innerHTML=`<span class="pa">↓</span><span class="pt">Pull to change mood</span>`;document.body.appendChild(pullHint);
+let pullY=null,pullX=0,pulling=false,pullP=0;const PULL_GO=72;
+const stageEl=()=>document.getElementById("stage");const pullEls=()=>[stageEl(),document.querySelector(".note")].filter(Boolean);
+function setPull(p){pullP=p;const ready=p>=PULL_GO;pullEls().forEach(el=>el.style.transform=p?`translateY(${p}px)`:"");
+  pullHint.style.opacity=Math.min(1,p/36);pullHint.style.transform=`translateX(-50%) translateY(${Math.min(p,PULL_GO)*.45}px)`;
+  if(pullHint.classList.contains("ready")!==ready){pullHint.classList.toggle("ready",ready);pullHint.querySelector(".pt").textContent=ready?"Release to change mood":"Pull to change mood";
+    if(ready&&navigator.vibrate)try{navigator.vibrate(8)}catch(_){}}}
+function endPull(){const p=pullP;pulling=false;pullY=null;if(!p)return;const els=pullEls();
+  if(p>=PULL_GO&&!RM()){const as=els.map(el=>el.animate([{transform:`translateY(${p}px)`,opacity:1},{transform:`translateY(${p+140}px)`,opacity:0}],{duration:200,easing:"cubic-bezier(.4,0,1,1)",fill:"forwards"}));
+    pullHint.style.transition="opacity .2s";pullHint.style.opacity=0;
+    as[0].onfinish=()=>{as.forEach(a=>a.cancel());pullHint.style.transition="";setPull(0);expandSentence()}}
+  else if(p>=PULL_GO){setPull(0);expandSentence()}
+  else{els.forEach(el=>el.animate([{transform:`translateY(${p}px)`},{transform:"none"}],{duration:RM()?0:380,easing:"cubic-bezier(.2,1.2,.35,1)"}));
+    pullHint.style.transition="opacity .25s";setPull(0);setTimeout(()=>pullHint.style.transition="",260)}}
+addEventListener("touchstart",e=>{pullY=((S.mood||S.list)&&window.scrollY<=0&&!document.querySelector("dialog[open]")&&e.touches.length===1)?e.touches[0].clientY:null;pullX=e.touches[0].clientX;pulling=false},{passive:true});
+addEventListener("touchmove",e=>{if(pullY==null)return;const d=e.touches[0].clientY-pullY,dx=e.touches[0].clientX-pullX;
+  if(!pulling){if(d>6&&d>Math.abs(dx)&&window.scrollY<=0)pulling=true;else if(d<-4||Math.abs(dx)>10){pullY=null;return}else return}
+  if(e.cancelable)e.preventDefault(); // we own this pull: no browser bounce or refresh
+  setPull(Math.max(0,d<=0?0:150*(1-Math.exp(-d/190))))},{passive:false}); // rubber band: eases off as you pull
+addEventListener("touchend",()=>{if(pulling)endPull();else pullY=null});addEventListener("touchcancel",()=>{if(pulling)endPull();else pullY=null});
+addEventListener("wheel",e=>{if(window.scrollY<=0&&e.deltaY<-20&&!document.querySelector("dialog[open]"))expandSentence()},{passive:true});
+document.getElementById("mini").addEventListener("click",e=>{if(!e.target.closest("button"))expandSentence()});
+
+let opener=null,reelFrom=null;
+const RM=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+// lift a card out of the row into a free-floating copy, so it can travel anywhere on screen
+function lift(card){const r=card.getBoundingClientRect(),w=document.createElement("div"),c=card.cloneNode(true);
+  // a plain rounded frame with its own background and a hard clip; the card's content sits inside it
+  w.className="flywrap";Object.assign(w.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
+  c.classList.add("flyinner");c.removeAttribute("data-id");c.classList.remove("scrolls");
+  Object.assign(c.style,{height:"auto",minHeight:r.height+"px",marginTop:-card.scrollTop+"px"});
+  w.appendChild(c);document.getElementById("reel").appendChild(w);
+  card.style.opacity="0";return {c:w,r}}
+// the remaining cards slide over to close the gap
+// the empty slot shrinks to nothing, so the neighbours glide in together; snapping waits until they land
+function closeGap(card){const deck=card.parentElement;if(!deck||card.dataset.closing||!S.seen.has(card.dataset.id))return;card.dataset.closing=1;
+  const idx=[...deck.children].indexOf(card),w=card.getBoundingClientRect().width,gap=parseFloat(getComputedStyle(deck).columnGap)||0;
+  const finish=()=>{const keep=deck.scrollLeft;card.remove();
+    ["visibility","opacity","flexBasis","marginRight","padding","boxShadow","maxWidth"].forEach(p=>card.style[p]="");delete card.dataset.closing;
+    deck.scrollLeft=keep;deck.style.scrollSnapType="";deck.dispatchEvent(new Event("scroll"));
+    if(!deck.children.length){document.getElementById("reel").close();return}
+    const next=deck.children[Math.min(idx,deck.children.length-1)];(next.querySelector(".seenbtn")||deck).focus({preventScroll:true})};
+  if(RM()){finish();return}
+  deck.style.scrollSnapType="none";
+  Object.assign(card.style,{visibility:"hidden",padding:"0",boxShadow:"none",maxWidth:"none",flexBasis:w+"px"});
+  const a=card.animate([{flexBasis:w+"px",marginRight:"0px"},{flexBasis:"0px",marginRight:-gap+"px"}],
+    {duration:420,easing:"cubic-bezier(.32,.72,0,1)",fill:"forwards"});
+  a.onfinish=()=>{a.cancel();finish()};
+}
+// fling the lifted copy off the top of the screen, carrying the speed of the flick
+function flyOut(card,lifted,dy=0,v=0){
+  const {c,r}=lifted||lift(card),to=-(r.bottom+80);
+  const speed=Math.max(Math.abs(v),1.4),dur=RM()?0:Math.min(380,Math.max(170,(dy-to)/speed));
+  const a=c.animate([{transform:`translateY(${dy}px) scale(${scaleFor(dy)})`},{transform:`translateY(${to}px) scale(.9)`}],
+    {duration:dur,easing:"cubic-bezier(.22,.75,.3,1)",fill:"forwards"});
+  setTimeout(()=>closeGap(card),dur*.45); // neighbours start moving while the card is still leaving
+  a.onfinish=()=>c.remove();
+}
+const scaleFor=dy=>1-Math.min(.08,Math.abs(Math.min(0,dy))/2600);
+let lastSeen=null,toastT=0;
+function markSeen(id,lifted,dy,v){
+  S.seen.add(id);store.set("mr.seen",[...S.seen]);
+  const card=document.querySelector(`#reel .pick[data-id="${id}"]`);
+  if(card){const deck=card.parentElement;lastSeen={id,card,idx:[...deck.children].indexOf(card)};
+    flyOut(card,lifted,dy||0,v||0);
+    const t=document.querySelector("#reel .toast");
+    t.innerHTML=`Marked as seen <button data-act="undoseen">Undo</button>`;t.hidden=false;
+    clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},5000)}
+  else {render();announce(`${T[id][0]} marked as seen`)}
+}
+function undoSeen(){if(!lastSeen)return;const {id,card,idx}=lastSeen;lastSeen=null;
+  S.seen.delete(id);store.set("mr.seen",[...S.seen]);
+  card.getAnimations().forEach(a=>a.cancel());delete card.dataset.closing;
+  ["visibility","opacity","flexBasis","marginRight","padding","boxShadow","maxWidth"].forEach(p=>card.style[p]="");
+  const deck=document.querySelector("#reel [data-deck]");if(deck)deck.style.scrollSnapType="";
+  if(card.isConnected)card.remove();
+  if(deck){deck.insertBefore(card,deck.children[idx]||null);deck.scrollTo({left:idx*step(deck)});deck.dispatchEvent(new Event("scroll"));
+    if(!RM())card.animate([{transform:"translateY(-60px) scale(.94)",opacity:0},{transform:"none",opacity:1}],{duration:320,easing:"cubic-bezier(.2,.8,.2,1)"})}
+  const t=document.querySelector("#reel .toast");if(t){t.textContent="Restored";clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},1500)}}
+// swipe up on a card, like closing an app on iPhone
+(function(){
+  const reel=document.getElementById("reel");
+  let card=null,lifted=null,x0=0,y0=0,dy=0,samples=[];
+  // touch events (not pointer events) so the browser can't take the gesture away halfway through
+  const start=(t,x,y,target)=>{const c=target.closest(".rbody .pick");
+    if(!c||target.closest("button,a")||lifted)return;
+    if(c.classList.contains("scrolls")&&c.scrollTop+c.clientHeight<c.scrollHeight-2)return; // let long cards scroll first
+    card=c;x0=x;y0=y;dy=0;samples=[{t,y}]};
+  const move=(t,x,y,e)=>{if(!card)return;
+    const dx=x-x0,raw=y-y0;
+    if(!lifted){
+      if(raw<-6&&Math.abs(raw)>Math.abs(dx)*.8){lifted=lift(card)}
+      else if(Math.abs(dx)>10||raw>10){card=null;return} else return}
+    if(e.cancelable)e.preventDefault(); // once lifted, the card owns the finger: no sideways scroll, no cancel
+    dy=raw<0?raw:raw*.25; // downward pulls meet resistance
+    samples.push({t,y});while(samples.length>2&&t-samples[0].t>100)samples.shift();
+    lifted.c.style.transform=`translateY(${dy}px) scale(${scaleFor(dy)})`};
+  const end=()=>{if(!card)return;const c=card;card=null;if(!lifted)return;const L=lifted;lifted=null;
+    reel.dataset.dragged="1";setTimeout(()=>{delete reel.dataset.dragged},350); // swallow the click that follows a drag
+    const s0=samples[0],s1=samples[samples.length-1],v=(s1.y-s0.y)/Math.max(1,s1.t-s0.t); // px per ms, negative = upward
+    // goes if it's a quarter of the way up and not being pulled back down, or flicked upward at any distance
+    if((dy<-L.r.height*.22&&v<.15)||v<-.35||dy<-L.r.height*.5){markSeen(c.dataset.id,L,dy,Math.min(v,-.6))}
+    else{const a=L.c.animate([{transform:`translateY(${dy}px) scale(${scaleFor(dy)})`},{transform:"none"}],
+        {duration:RM()?0:420,easing:"cubic-bezier(.2,1.25,.35,1)",fill:"forwards"});
+      a.onfinish=()=>{L.c.remove();c.style.opacity=""}}};
+  const pt=e=>e.changedTouches[0];
+  reel.addEventListener("touchstart",e=>{if(e.touches.length===1)start(e.timeStamp,pt(e).clientX,pt(e).clientY,e.target)},{passive:true});
+  reel.addEventListener("touchmove",e=>move(e.timeStamp,pt(e).clientX,pt(e).clientY,e),{passive:false});
+  reel.addEventListener("touchend",end);reel.addEventListener("touchcancel",end);
+  // mouse / pen
+  let pid=null;
+  reel.addEventListener("pointerdown",e=>{if(e.pointerType==="touch")return;pid=e.pointerId;start(e.timeStamp,e.clientX,e.clientY,e.target)});
+  reel.addEventListener("pointermove",e=>{if(e.pointerType==="touch"||e.pointerId!==pid)return;
+    const was=!!lifted;move(e.timeStamp,e.clientX,e.clientY,e);if(!was&&lifted)try{reel.setPointerCapture(pid)}catch(_){}});
+  const pend=e=>{if(e.pointerType!=="touch"&&e.pointerId===pid){pid=null;end()}};
+  reel.addEventListener("pointerup",pend);reel.addEventListener("pointercancel",pend);
+})();
+// every card takes the tallest card's height (capped to the screen); match, links and "Seen it" sit at the bottom
+function evenCards(){const deck=document.querySelector("#reel [data-deck]");if(!deck)return;
+  const cards=[...deck.querySelectorAll(":scope>.pick")];cards.forEach(c=>{c.style.height="";c.classList.remove("scrolls")});
+  const cs=getComputedStyle(deck),room=deck.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+  const h=Math.min(room,Math.max(0,...cards.map(c=>c.scrollHeight)));
+  cards.forEach(c=>{c.style.height=h+"px";if(c.scrollHeight>c.clientHeight+2)c.classList.add("scrolls")});
+  const dc=deck.querySelector(".dealcard");if(dc)dc.style.height=h+"px"}
+addEventListener("resize",()=>{if(document.getElementById("reel").open)evenCards()});
+// deal 5 from the pool: better matches turn up more often, and titles already dealt sit out until the pool runs dry
+const HAND=5,dealt=store.get("mr.dealt",{});
+function deal(key,ranked){if(ranked.length<=HAND)return ranked;
+  const k=[S.mood,key,S.fmt,S.svc].join("|");let past=new Set(dealt[k]||[]);
+  let pool=ranked.filter(([id])=>!past.has(id));
+  if(pool.length<HAND){const last=new Set((dealt[k]||[]).slice(-HAND));past=new Set();pool=ranked.filter(([id])=>!last.has(id));if(pool.length<HAND)pool=ranked}
+  const hand=[],w=pool.map(([,v])=>Math.exp((v-100)/8));
+  while(hand.length<HAND&&pool.length){let x=Math.random()*w.reduce((a,b)=>a+b,0),i=0;while(i<w.length-1&&(x-=w[i])>0)i++;
+    hand.push(pool[i]);pool.splice(i,1);w.splice(i,1)}
+  dealt[k]=[...past,...hand.map(([id])=>id)];store.set("mr.dealt",dealt);
+  return hand.sort((a,b)=>b[1]-a[1])}
+function openReel(key,from,again){
+  const dl=document.getElementById("reel");reelFrom=from;S.theme=key;
+  const th=key==="_all"?null:currentTheme();
+  const all=rankIds(key==="_all"?inMood(S.mood):th.ids),r=key==="_all"?all:deal(key,all);
+  const more=r.length<all.length?`<div class="dealcard"><p>${all.length} titles fit this mood. Want a fresh hand?</p><button class="dealbtn" data-act="deal">Deal me ${HAND} more</button></div>`:"";
+  const story=key==="_all"?"anything":key==="_more"?"something else":STORY_ONE[key]||th.label;
+  const head=key==="_all"?`every ${S.mood} title`:key==="_more"?`more ${S.mood} picks`:th.label;
+  dl.innerHTML=`<div class="rhead"><h2 class="eyebrow" id="reel-title">${esc(head[0].toUpperCase()+head.slice(1))}</h2>
+      <p class="sr">${esc(S.mood)}, ${r.length} ${r.length===1?"title":"titles"}, best match first. Swipe or use the arrow keys.</p>
+      <button class="rclose" data-act="closereel" aria-label="Close">✕</button></div>
+    <div class="toast" role="status" hidden></div>
+    <div class="rbody"><div class="deck picks" data-deck tabindex="0" aria-label="Titles, swipe or use arrow keys">${r.map(([id,v],i)=>pick(id,i+1,v)).join("")}${more}</div>${deckbar(r.length+(more?1:0))}</div>`;
+  if(!dl.open)dl.showModal();wireDeck(dl.querySelector("[data-deck]"));
+  evenCards();document.fonts.ready.then(evenCards);dl.querySelector("[data-deck]").focus({preventScroll:true});
+  if(again&&!RM())dl.querySelectorAll(".rbody .pick").forEach((c,i)=>c.animate([{opacity:0,transform:"translateX(40px)"},{opacity:1,transform:"none"}],{duration:320,delay:i*40,easing:"cubic-bezier(.2,.8,.2,1)",fill:"backwards"}));
+  announce(again?`${r.length} new ${STORY_ONE[key]||"titles"} picks`:`${S.mood}, ${story}: ${r.length} of ${all.length} titles`);
+}
+document.getElementById("reel").addEventListener("click",e=>{const r=document.getElementById("reel");
+  if(r.dataset.dragged){delete r.dataset.dragged;return}
+  if(!e.target.closest(".pick,.dealcard,button,a,.deckbar"))r.close()});
+document.getElementById("reel").addEventListener("close",()=>{S.theme=null;document.getElementById("reel").innerHTML="";lastSeen=null;
+  const key=reelFrom&&reelFrom.dataset.theme,deck=document.querySelector("#stage [data-deck]"),x=deck?deck.scrollLeft:0;
+  render();const d2=document.querySelector("#stage [data-deck]");if(d2)d2.scrollLeft=x;
+  const nb=key&&document.querySelector(`#stage [data-theme="${key}"]`);if(nb)nb.focus({preventScroll:true})});
+function openDetail(id,from){const dl=document.getElementById("detail");opener=from;
+  const r=S.list?[]:rankIds(resultsPool()),i=r.findIndex(x=>x[0]===id),v=i>=0?r[i][1]:score(id);
+  dl.innerHTML=`<div class="dclose"><button data-act="close">Close</button></div>${pick(id,i+1,v)}`;
+  dl.showModal();const img=dl.querySelector("img[data-art]");if(img)loadImg(img);dl.querySelector(".pick").classList.add("dev")}
+document.getElementById("detail").addEventListener("close",()=>{const id=opener&&opener.dataset.open,y=window.scrollY;render();window.scrollTo(0,y);
+  document.querySelectorAll(".grid img[src]").forEach(i=>{i.style.transitionDelay="0s";i.classList.add("dev-on")});
+  const nb=id&&document.querySelector(`[data-open="${id}"]`);if(nb)nb.focus({preventScroll:true})});
+const bundles={};
+function bundle(b){return bundles[b]||(bundles[b]=fetch(`data/art${b}.json`).then(r=>r.json()).catch(()=>({})))}
+const hiBundles={};
+function hiBundle(b){return hiBundles[b]||(hiBundles[b]=fetch(`data/hi${b}.json`).then(r=>r.json()).catch(()=>({})))}
+function loadImg(img){const hi=img.dataset.hi,id=hi||img.dataset.art;if(!T[id]||img.dataset.loading)return;img.dataset.loading=1;
+  (hi?hiBundle(T[id][12]):bundle(T[id][9])).then(m=>{if(m[id])img.src=m[id]})}
+function hydrate(){document.querySelectorAll("img[data-art]:not([src]),img[data-hi]:not([src])").forEach(img=>{if(!img.closest(".deck,.grid"))loadImg(img)})}
+function hydrateNear(deck,i){[...deck.children].slice(Math.max(0,i-1),i+4).forEach(c=>c.querySelectorAll("img[data-art]:not([src]),img[data-hi]:not([src])").forEach(loadImg))}
+fetch("data/titles.json").then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).then(d=>{
+  for(const [k,v] of Object.entries(d)){T[k]=v;G[k]=[v[5],v[6],v[7]]}
+  render();
+}).catch(()=>{document.getElementById("stage").innerHTML=`<div class="empty"><strong>The catalog didn't load</strong>Check your connection, then reload the page.</div>`});
+</script>
+
+</body>
+</html>
